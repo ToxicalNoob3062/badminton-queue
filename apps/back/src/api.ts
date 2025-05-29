@@ -42,7 +42,7 @@ export const api = new Elysia({
 .get("/health",async () => {
   return {status: "ok"};
 })
-.get("/players",async ({store:{db},timingService}) => {
+.get("/players",async ({store:{db}}) => {
   const players = db.players.map(player => ({
     id: player.id,
     name: player.name,
@@ -54,7 +54,7 @@ export const api = new Elysia({
 .post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
     id: db.players.length.toString(),
-    name
+    name,
     secret,
     stamp,
   } as Player;
@@ -73,11 +73,13 @@ export const api = new Elysia({
     })
   }),
 })
-.post("/complain", async ({body,store:{db},status})=>{
-  db.complaints.push(body);
+.post("/complain", async ({body:{complaint},store:{db},status})=>{
+  db.complaints.push(complaint);
   return status(201,{message: "Complaint submitted successfully"});
 },{
-  body:t.String()
+  body:t.Object({
+    complaint: t.String()
+  })
 })
 .delete("/erase:id",async ({params:{id},store:{db},body:{secret},status})=>{
   const index = db.players.findIndex(player => player.id === id);

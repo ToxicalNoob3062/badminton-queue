@@ -1,18 +1,16 @@
 {
   "name": "badminton-queue",
   "version": "1.0.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint"
-  },
   "packageManager": "bun@1.2.11",
   "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev"
+  },
   "trustedDependencies": [
     "@tailwindcss/oxide"
+  ],
+  "workspaces": [
+    "apps/*"
   ]
 }

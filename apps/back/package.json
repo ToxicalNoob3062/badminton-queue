@@ -2,7 +2,6 @@
   "name": "back",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --minify --outdir dist"
   },
@@ -15,8 +14,7 @@
   },
   "devDependencies": {
     "@types/luxon": "^3.6.2",
-    "bun-types": "latest",
-    "@local/eslint-config": "*"
+    "bun-types": "latest"
   },
   "module": "src/index.js"
 }

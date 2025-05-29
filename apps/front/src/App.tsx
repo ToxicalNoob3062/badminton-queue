@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import Form from "./comp/Form";
 import Table from "./comp/Table";
 import ModalUI from "./comp/Modal";
@@ -13,7 +14,7 @@ function App() {
     <div id="app-root" class='bg-lime-50 shadow-md w-full min-h-screen p-4 relative'>
       <div id="app-container" class='max-w-sm mx-auto shadow-md bg-white p-6 rounded-lg relative'>
         <h1 class='text-3xl text-teal-950 text-center'>Badminton Queue</h1>
-        <p class='text-xl text-orange-500 text-center p-2'>27th May, 2027</p>
+        <p class='text-xl text-orange-500 text-center p-2'>{format(Date.now(), "do MMMM, yyyy")}</p>
         <Form />
         {/* display */}
         <div id="display" class='flex flex-col gap-4 mt-6'>
