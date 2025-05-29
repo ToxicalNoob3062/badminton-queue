@@ -16,6 +16,5 @@ function compareTimes(timeA: string, timeB: string): number {
 }
 
 export default {
-  parseTime,
   compareTimes
 };

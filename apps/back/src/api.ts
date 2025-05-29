@@ -6,6 +6,7 @@ type Player = {
   id: string;
   name: string;
   stamp: string;
+  secret: string;
 };
 
 export const api = new Elysia({
@@ -17,7 +18,7 @@ export const api = new Elysia({
   past: [] as string[],
   players: [] as Player[],
   complaints: [] as string[],
-  startTime: "3:00 PM"
+  startTime: "10:00 AM"
 })
 .derive(async ()=>{
   return {
@@ -34,28 +35,42 @@ export const api = new Elysia({
     store.db.past = [day,month,year];
     store.db.players = [];
   }
-  if (timingService.compareTimes(store.db.startTime,stamp)<0){
+  if (timingService.compareTimes(store.db.startTime,stamp)>=0){
     return status(403,{message: "Participation starts at 3:00 pm"});
   }
 })
 .get("/health",async () => {
   return {status: "ok"};
 })
-.get("/players",async ({store}) => {
-  return store.db.players;
+.get("/players",async ({store,timingService}) => {
+  const players = store.db.players.map(player => ({
+    id: player.id,
+    name: player.name,
+    stamp: player.stamp,
+  }));
+  players.sort((a,b)=>a.id.localeCompare(b.id));
+  return players;
 })
 .post("/join", async ({body,store,status,stamp})=>{
   const player = {
-    id: body.id,
+    id: store.db.players.length.toString(),
     name: body.name,
+    secret: body.secret,
     stamp,
   } as Player;
+  if (store.db.players.find(p => p.name === player.name)) {
+    return status(409,{message: "Player name already exists"});
+  }
   store.db.players.push(player);
   return status(201,{message: "Player joined successfully"});
 },{
   body:t.Object({
-    id: t.String(),
     name: t.String(),
+    secret: t.String({
+      min: 8,
+      max: 15,
+      message: "Secret must be between 8 and 15 characters"
+    })
   }),
 })
 .post("/complain", async ({body,store,status})=>{
@@ -64,14 +79,22 @@ export const api = new Elysia({
 },{
   body:t.String()
 })
-.delete("/erase:id",async ({params,store,status})=>{
-  const {id} = params;
-  const index = store.db.players.findIndex(player => player.id === id);
+.delete("/erase:id",async ({params:{id},store:{db},body:{secret},status})=>{
+  const index = db.players.findIndex(player => player.id === id);
   if(index === -1) return status(404,{message: "Player not found"});
-  store.db.players.splice(index,1);
+  if (db.players[index].secret !== secret)
+    return status(403,{message: "Invalid secret"});
+  db.players.splice(index,1);
   return status(200,{message: "Player erased successfully"});
 },{
   params:t.Object({
     id: t.String(),
   }),
+  body:t.Object({
+    secret: t.String({
+      min: 8,
+      max: 15,
+      message: "Secret must be between 8 and 15 characters"
+    })
+  })
 })
