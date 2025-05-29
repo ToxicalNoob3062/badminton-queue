@@ -9,7 +9,7 @@ type ModalContextType = [
 ];
 
 // No default value for strictness
-export const ModalContext = createContext<ModalContextType>();
+const ModalContext = createContext<ModalContextType>();
 
 // Custom hook for safety
 export function useModalContext() {
