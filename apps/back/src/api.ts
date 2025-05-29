@@ -25,25 +25,25 @@ export const api = new Elysia({
     stamp: DateTime.now().setZone('America/Toronto').toFormat('h:mm a')
   }
 })
-.onBeforeHandle(async ({store,stamp,timingService,status})=>{
-  const [day,month,year] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM yyyy').split(' ');
-  const [pDay, pMonth] = store.db.past;
+.onBeforeHandle(async ({store:{db},stamp,timingService,status})=>{
+  const [day,month] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM').split(' ');
+  const [pDay, pMonth] = db.past;
   if (month!==pMonth){
-    store.db.complaints = [];
+    db.complaints = [];
   }
   if (day !== pDay){
-    store.db.past = [day,month,year];
-    store.db.players = [];
+    db.past = [day,month];
+    db.players = [];
   }
-  if (timingService.compareTimes(store.db.startTime,stamp)>=0){
+  if (timingService.compareTimes(db.startTime,stamp)>=0){
     return status(403,{message: "Participation starts at 3:00 pm"});
   }
 })
 .get("/health",async () => {
   return {status: "ok"};
 })
-.get("/players",async ({store,timingService}) => {
-  const players = store.db.players.map(player => ({
+.get("/players",async ({store:{db},timingService}) => {
+  const players = db.players.map(player => ({
     id: player.id,
     name: player.name,
     stamp: player.stamp,
@@ -51,17 +51,17 @@ export const api = new Elysia({
   players.sort((a,b)=>a.id.localeCompare(b.id));
   return players;
 })
-.post("/join", async ({body,store,status,stamp})=>{
+.post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
-    id: store.db.players.length.toString(),
-    name: body.name,
-    secret: body.secret,
+    id: db.players.length.toString(),
+    name
+    secret,
     stamp,
   } as Player;
-  if (store.db.players.find(p => p.name === player.name)) {
+  if (db.players.find(p => p.name === player.name)) {
     return status(409,{message: "Player name already exists"});
   }
-  store.db.players.push(player);
+  db.players.push(player);
   return status(201,{message: "Player joined successfully"});
 },{
   body:t.Object({
@@ -73,8 +73,8 @@ export const api = new Elysia({
     })
   }),
 })
-.post("/complain", async ({body,store,status})=>{
-  store.db.complaints.push(body);
+.post("/complain", async ({body,store:{db},status})=>{
+  db.complaints.push(body);
   return status(201,{message: "Complaint submitted successfully"});
 },{
   body:t.String()
