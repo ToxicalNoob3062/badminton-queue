@@ -1,48 +1,38 @@
 import { createContext, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
+import { createResource } from "solid-js";
 import { makePersisted } from "@solid-primitives/storage";
 import type { JSX } from "solid-js";
+import { getPlayers , getComplaints} from "../server/server";
 
-type Player = {
-  id: string;
-  name: string;
-  stamp: string;
-};
-
-const defaultState = {
+const formInput = {
   name: "",
   secret: "",
-  players: [] as Player[],
-  complaints: [] as string[],
 };
 
-const storage = makePersisted(createStore(defaultState), {
+// will store the form input in local storage
+const input = makePersisted(createStore(formInput), {
   name: "app-store",
-  serialize: (value) =>
-    JSON.stringify({
-      name: value.name,
-      secret: value.secret,
-    }),
-  deserialize: (str) =>
-    !str
-      ? defaultState
-      : {
-          ...defaultState,
-          ...JSON.parse(str),
-        },
 });
 
-type StoreTuple = typeof storage;
+// get the players from the server
+const [players] = createResource(getPlayers);
+const [complaints] = createResource(getComplaints);
 
+const storeValue = {
+  input,
+  players,
+  complaints,
+}
 
-const StoreContext = createContext<StoreTuple | undefined>(undefined);
+const StoreContext = createContext<typeof storeValue | undefined>(undefined);
 
-export const useStoreContext = (): StoreTuple => {
+export const useStoreContext = (): typeof storeValue => {
   const context = useContext(StoreContext);
   if (!context) throw new Error("useStoreContext must be used within a StoreProvider");
   return context;
 };
 
 export default function StoreProvider(props: { children: JSX.Element }) {
-  return <StoreContext.Provider value={storage}>{props.children}</StoreContext.Provider>;
+  return <StoreContext.Provider value={storeValue}>{props.children}</StoreContext.Provider>;
 }

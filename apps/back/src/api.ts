@@ -51,6 +51,9 @@ export const api = new Elysia({
   players.sort((a,b)=>a.id.localeCompare(b.id));
   return players;
 })
+.get("/complains",async ({store:{db}}) => {
+  return db.complaints;
+})
 .post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
     id: db.players.length.toString(),
