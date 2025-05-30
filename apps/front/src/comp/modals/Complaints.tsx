@@ -8,7 +8,7 @@ export default function Complaints() {
       <div class="flex flex-wrap gap-2">
         <ErrorBoundary fallback={(err) => (
           <div class="text-red-500">
-            Error loading complaints: {err.message}
+            {err.message}
           </div>
         )}>
           <Suspense fallback={<div class="text-gray-500">Loading complaints...</div>}>

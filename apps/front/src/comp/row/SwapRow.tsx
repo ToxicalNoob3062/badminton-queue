@@ -30,7 +30,7 @@ export default function SwapRow(props: { id: string, name: string, time: string 
         mutatePlayers((prev) => 
           prev && 
           prev.filter(player => player.id !== props.id)
-              .map((player, idx) => ({ ...player, id: `${idx+1}` }))
+              .map((player, idx) => player.id>props.id ?({ ...player, id: `${idx+1}` }) : player)
         );
       })
       .catch((error) => {
