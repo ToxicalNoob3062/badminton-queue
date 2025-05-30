@@ -6,7 +6,7 @@ type ErrorResponse = {
     message: string;
 }
 
-const server = treaty<App>('http://localhost:3000')
+const server = treaty<App>('http://192.168.86.102:3000')
 
 
 async function sleep(ms: number) {
@@ -25,7 +25,7 @@ export async function getPlayers() {
 
 export async function getComplaints() {
     await sleep(100)
-    const resp = await server.api.complains.get()
+    const resp = await server.api.complaints.get()
     if (resp.error) {
         const error = resp.error.value as ErrorResponse;
         throw new Error(error.message)
@@ -41,3 +41,22 @@ export async function join(name: string, secret: string) {
     }
     return resp.data
 }
+
+export async function complain(message: string) {
+    const resp = await server.api.complain.post({ complaint: message })
+    if (resp.error) {
+        const error = resp.error.value as ErrorResponse;
+        throw new Error(error.message)
+    }
+    return resp.data
+}
+
+export async function leave(id: string, secret: string) {
+   const resp = await server.api.leave({id}).delete({ secret })
+    if (resp.error) {
+        const error = resp.error.value as ErrorResponse;
+        throw new Error(error.message)
+    }
+    return resp.data
+}
+

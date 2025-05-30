@@ -14,7 +14,7 @@ export default function Complaints() {
           <Suspense fallback={<div class="text-gray-500">Loading complaints...</div>}>
             <For each={complaints()}>
               {(complaint) => (
-                <p class="bg-gray-100 p-2 rounded-md shadow-sm">{complaint}</p>
+                <p class="bg-gray-100 p-2 rounded-md shadow-teal-500 shadow-sm">{complaint}</p>
               )}
             </For>
           </Suspense>

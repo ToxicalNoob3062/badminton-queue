@@ -1,13 +1,15 @@
 import { gsap } from "gsap";
 
-export function makeRowSwappy(threeLayers: {
+export function makeRowSwappy(props: {
   show: HTMLDivElement,
   remove: HTMLDivElement,
-  complain: HTMLDivElement
+  complain: HTMLDivElement,
+  onRemove: () => void,
+  onComplain: () => void
 }) {
-  const showLayer = threeLayers.show
-  const removeLayer = threeLayers.remove
-  const complainLayer = threeLayers.complain
+  const showLayer = props.show
+  const removeLayer = props.remove
+  const complainLayer = props.complain
   let direction: 'left' | 'right' | null = null;
 
   function percentage(clickPoint: number) {
@@ -54,9 +56,7 @@ export function makeRowSwappy(threeLayers: {
           duration: 0.3,
           opacity: 0,
           ease: "power2.out",
-          onComplete: () => {
-            console.log("Removing User....")
-          }
+          onComplete: props.onRemove
         })
       } else {
         gsap.to(showLayer, {
@@ -64,8 +64,14 @@ export function makeRowSwappy(threeLayers: {
           opacity: 0,
           duration: 0.3,
           ease: "power2.out",
-          onComplete: () => {
-            console.log("Filing complaint....")
+          onComplete: ()=>{
+            props.onComplain();
+            gsap.to(showLayer, {
+              x: 0,
+              opacity: 1,
+              duration: 0.3,
+              ease: "power2.out",
+            })
           }
         })
       }

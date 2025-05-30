@@ -26,27 +26,18 @@ export const api = new Elysia({
   past: [] as string[],
   players: [] as Player[],
   complaints: [] as string[],
-  startTime: "3:00 PM"
+  startTime: "10:00 AM"
 })
-.model({
-  joinPayload: t.Object({
-    name: t.String(),
-    secret: secretSchema
-  }),
-  erasePayload: t.Object({
-    secret: secretSchema
-  })
+.get("/health",async () => {
+  return {status: "ok"};
+})
+.get("/complaints",async ({store:{db}}) => {
+  return db.complaints;
 })
 .derive(async ()=>{
   return {
     stamp: DateTime.now().setZone('America/Toronto').toFormat('h:mm a')
   }
-})
-.get("/health",async () => {
-  return {status: "ok"};
-})
-.get("/complains",async ({store:{db}}) => {
-  return db.complaints;
 })
 .onBeforeHandle(async ({store:{db},stamp,timingService,status})=>{
   const [day,month] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM').split(' ');
@@ -71,6 +62,23 @@ export const api = new Elysia({
   players.sort((a,b)=>a.id.localeCompare(b.id));
   return players;
 })
+.post("/complain", async ({body:{complaint},store:{db},status})=>{
+  db.complaints.push(complaint);
+  return status(201,{message: "Complaint submitted successfully!"});
+},{
+  body:t.Object({
+    complaint: t.String()
+  })
+})
+.model({
+  joinPayload: t.Object({
+    name: t.String(),
+    secret: secretSchema
+  }),
+  leavePayload: t.Object({
+    secret: secretSchema
+  })
+})
 .post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
     id: (db.players.length+1).toString(),
@@ -85,24 +93,18 @@ export const api = new Elysia({
 },{
   body:'joinPayload',
 })
-.post("/complain", async ({body:{complaint},store:{db},status})=>{
-  db.complaints.push(complaint);
-  return status(201,{message: "Complaint submitted successfully!"});
-},{
-  body:t.Object({
-    complaint: t.String()
-  })
-})
-.delete("/erase:id",async ({params:{id},store:{db},body:{secret},status})=>{
+.delete("/leave/:id",async ({params:{id},store:{db},body:{secret},status})=>{
   const index = db.players.findIndex(player => player.id === id);
   if(index === -1) return status(404,{message: "Player not found!"});
   if (db.players[index].secret !== secret)
     return status(403,{message: "Invalid secret!"});
-  db.players.splice(index,1);
+  db.players = db.players
+    .filter(player => player.id !== id)
+    .map((player, idx) => ({ ...player, id: (idx + 1).toString() }));
   return status(200,{message: "Player erased successfully!"});
 },{
   params:t.Object({
     id: t.String(),
   }),
-  body: 'erasePayload',
+  body: 'leavePayload',
 })
