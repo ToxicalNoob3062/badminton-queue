@@ -1,6 +1,12 @@
 import SwapRow from "./row/SwapRow";
+import { ErrorBoundary } from "solid-js";
+import { Suspense } from "solid-js";
+import { useStoreContext } from "../providers/stores";
+import { For } from "solid-js";
+import Spinner from "./Spinner";
 
 export default function Table() {
+    const { playersResource:[players] } = useStoreContext();
     return (
       <section id="table" class='text-left flex flex-col gap-3'>
         <div id="table-header" class="text-md">
@@ -12,17 +18,15 @@ export default function Table() {
           </p>
         </div>
         <div id="table-body" class="text-gray-700 flex flex-col gap-3">
-          <SwapRow id='1' name="Virat Kohli" time="1:00pm"  />
-          <SwapRow id='2' name="Hardik Pandya" time="2:45pm"  />
-          <SwapRow id='3' name="Rohit Sharma" time="3:15pm" />
-          <SwapRow id='4' name="Jasprit Bumrah" time="4:00pm" />
-          <SwapRow id='5' name="Bhuvneshwar Km" time="5:00pm" />
-          <SwapRow id='6' name="Mohammed Shami" time="6:00pm" />
-          <SwapRow id='7' name="Kuldeep Yadav" time="7:00pm" />
-          <SwapRow id='8' name="Ravindra Jadeja" time="8:00pm" />
-          <SwapRow id='9' name="Bhuvi" time="9:00pm" />
-          <SwapRow id='10' name="Yuvraj Singh" time="10:00pm" />
-          <SwapRow id='11' name="Shikhar Dhawan" time="11:00pm" />
+          <ErrorBoundary fallback={(err)=><p class="text-red-500 text-lg p-10 text-center">{err.message}</p>}>
+            <Suspense fallback={<Spinner/>}>
+             <For each={players()} fallback={<p class="text-gray-500 text-xl p-10 text-center">No players found!</p>}>  
+                {(player) => (
+                  <SwapRow id={player.id} name={player.name} time={player.stamp} />
+                )}
+              </For>
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </section>
     );

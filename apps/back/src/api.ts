@@ -18,7 +18,7 @@ export const api = new Elysia({
   past: [] as string[],
   players: [] as Player[],
   complaints: [] as string[],
-  startTime: "10:00 AM"
+  startTime: "9:00 PM"
 })
 .derive(async ()=>{
   return {
@@ -36,7 +36,7 @@ export const api = new Elysia({
     db.players = [];
   }
   if (timingService.compareTimes(db.startTime,stamp)>=0){
-    return status(403,{message: "Participation starts at 3:00 pm"});
+    return status(403,{message: `Participation starts at ${db.startTime}`});
   }
 })
 .get("/health",async () => {
@@ -56,7 +56,7 @@ export const api = new Elysia({
 })
 .post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
-    id: db.players.length.toString(),
+    id: (db.players.length+1).toString(),
     name,
     secret,
     stamp,
