@@ -32,3 +32,12 @@ export async function getComplaints() {
     }
     return resp.data
 }
+
+export async function join(name: string, secret: string) {
+    const resp = await server.api.join.post({ name, secret })
+    if (resp.error) {
+        const error = resp.error.value as ErrorResponse;
+        throw new Error(error.message)
+    }
+    return resp.data
+}

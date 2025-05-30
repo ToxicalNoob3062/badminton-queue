@@ -58,21 +58,22 @@ export const api = new Elysia({
   const player = {
     id: (db.players.length+1).toString(),
     name,
-    secret,
     stamp,
   } as Player;
   if (db.players.find(p => p.name === player.name)) {
     return status(409,{message: "Player name already exists"});
   }
-  db.players.push(player);
-  return status(201,{message: "Player joined successfully"});
+  db.players.push({...player, secret});
+  return status(201,player);
 },{
   body:t.Object({
     name: t.String(),
     secret: t.String({
-      min: 8,
-      max: 15,
-      message: "Secret must be between 8 and 15 characters"
+      minLength: 8,
+      maxLength: 15,
+      error: {
+        message: "Secret must be between 8 and 15 characters"
+      }
     })
   }),
 })
@@ -97,9 +98,11 @@ export const api = new Elysia({
   }),
   body:t.Object({
     secret: t.String({
-      min: 8,
-      max: 15,
-      message: "Secret must be between 8 and 15 characters"
+      minLength: 8,
+      maxLength: 15,
+      error: {
+        message: "Secret must be between 8 and 15 characters"
+      }
     })
   })
 })
