@@ -9,6 +9,14 @@ type Player = {
   secret: string;
 };
 
+const secretSchema = t.String({
+  minLength: 8,
+  maxLength: 15,
+  error: {
+    message: "Secret must be between 8 and 15 characters!"
+  }
+});
+
 export const api = new Elysia({
   name: "Badminton Queue API",
   prefix: "/api",
@@ -18,12 +26,27 @@ export const api = new Elysia({
   past: [] as string[],
   players: [] as Player[],
   complaints: [] as string[],
-  startTime: "9:00 PM"
+  startTime: "3:00 PM"
+})
+.model({
+  joinPayload: t.Object({
+    name: t.String(),
+    secret: secretSchema
+  }),
+  erasePayload: t.Object({
+    secret: secretSchema
+  })
 })
 .derive(async ()=>{
   return {
     stamp: DateTime.now().setZone('America/Toronto').toFormat('h:mm a')
   }
+})
+.get("/health",async () => {
+  return {status: "ok"};
+})
+.get("/complains",async ({store:{db}}) => {
+  return db.complaints;
 })
 .onBeforeHandle(async ({store:{db},stamp,timingService,status})=>{
   const [day,month] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM').split(' ');
@@ -36,11 +59,8 @@ export const api = new Elysia({
     db.players = [];
   }
   if (timingService.compareTimes(db.startTime,stamp)>=0){
-    return status(403,{message: `Participation starts at ${db.startTime}`});
+    return status(403,{message: `Participation starts at ${db.startTime}!`});
   }
-})
-.get("/health",async () => {
-  return {status: "ok"};
 })
 .get("/players",async ({store:{db}}) => {
   const players = db.players.map(player => ({
@@ -51,9 +71,6 @@ export const api = new Elysia({
   players.sort((a,b)=>a.id.localeCompare(b.id));
   return players;
 })
-.get("/complains",async ({store:{db}}) => {
-  return db.complaints;
-})
 .post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
   const player = {
     id: (db.players.length+1).toString(),
@@ -61,25 +78,16 @@ export const api = new Elysia({
     stamp,
   } as Player;
   if (db.players.find(p => p.name === player.name)) {
-    return status(409,{message: "Player name already exists"});
+    return status(409,{message: "Player name already exists!"});
   }
   db.players.push({...player, secret});
   return status(201,player);
 },{
-  body:t.Object({
-    name: t.String(),
-    secret: t.String({
-      minLength: 8,
-      maxLength: 15,
-      error: {
-        message: "Secret must be between 8 and 15 characters"
-      }
-    })
-  }),
+  body:'joinPayload',
 })
 .post("/complain", async ({body:{complaint},store:{db},status})=>{
   db.complaints.push(complaint);
-  return status(201,{message: "Complaint submitted successfully"});
+  return status(201,{message: "Complaint submitted successfully!"});
 },{
   body:t.Object({
     complaint: t.String()
@@ -87,22 +95,14 @@ export const api = new Elysia({
 })
 .delete("/erase:id",async ({params:{id},store:{db},body:{secret},status})=>{
   const index = db.players.findIndex(player => player.id === id);
-  if(index === -1) return status(404,{message: "Player not found"});
+  if(index === -1) return status(404,{message: "Player not found!"});
   if (db.players[index].secret !== secret)
-    return status(403,{message: "Invalid secret"});
+    return status(403,{message: "Invalid secret!"});
   db.players.splice(index,1);
-  return status(200,{message: "Player erased successfully"});
+  return status(200,{message: "Player erased successfully!"});
 },{
   params:t.Object({
     id: t.String(),
   }),
-  body:t.Object({
-    secret: t.String({
-      minLength: 8,
-      maxLength: 15,
-      error: {
-        message: "Secret must be between 8 and 15 characters"
-      }
-    })
-  })
+  body: 'erasePayload',
 })

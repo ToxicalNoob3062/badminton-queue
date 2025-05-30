@@ -1,3 +1,4 @@
+import ErrorModal from "./modals/Error";
 import { useStoreContext } from "../providers/stores";
 import { join } from "../server/server";
 import { useModalContext } from "../providers/modal";
@@ -25,10 +26,9 @@ export default function ButtonGroup() {
     }
     catch (error) {
       const err = error as Error;
-      setModal(<p class="px-4 py-6 text-md">{err.message}.</p>)
+      setModal(() => ErrorModal.bind(null, err));
     }
   }
-
   return (
     <div class='flex gap-3 text-white'>
       <button onClick={joinHandler} type="submit" id="join-button" class='flex-1/2 bg-black px-3 py-2 rounded-md'>

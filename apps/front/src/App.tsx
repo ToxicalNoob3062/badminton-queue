@@ -22,10 +22,10 @@ function App() {
           <Table/>
         </div>
         {/* rules */}
-        <button onClick={()=>setModal(RuleBook)} class="absolute left-3 top-3 rounded-full w-6 h-6">
+        <button onClick={()=>setModal(()=>RuleBook)} class="absolute left-3 top-3 rounded-full w-6 h-6">
           <img src="info.png" alt="info button" />
         </button>
-        <button onClick={()=>setModal(Complaints)} class="absolute right-2 top-2 rounded-full w-8 h-8">
+        <button onClick={()=>setModal(()=>Complaints)} class="absolute right-2 top-2 rounded-full w-8 h-8">
           <img src="warning.png" alt="warning button" />
         </button>
       </div>
