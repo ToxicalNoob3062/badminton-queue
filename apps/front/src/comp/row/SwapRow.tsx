@@ -14,6 +14,7 @@ export default function SwapRow(props: { id: string, name: string, time: string 
   let showLayer: HTMLDivElement | undefined;
   let removeLayer: HTMLDivElement | undefined;
   let complainLayer: HTMLDivElement | undefined;
+  let container: HTMLDivElement | undefined;
   let swapStartHandler: (event: TouchEvent) => void;
 
   let [, setModalContent] = useModalContext();
@@ -27,15 +28,24 @@ export default function SwapRow(props: { id: string, name: string, time: string 
   function onRemove() {
     leave(props.id, input.secret)
       .then(() => {
-        mutatePlayers((prev) => 
-          prev && 
-          prev.filter(player => player.id !== props.id)
-              .map((player, idx) => player.id>props.id ?({ ...player, id: `${idx+1}` }) : player)
-        );
+        gsap.to(container as HTMLDivElement, {
+          height: 0,
+          marginBottom: 0,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.inOut",
+          onComplete: () => {
+            mutatePlayers((prev) =>
+              prev &&
+              prev.filter(player => player.id !== props.id)
+                .map((player, idx) => player.id > props.id ? ({ ...player, id: `${idx + 1}` }) : player)
+            );
+          }
+        });
       })
       .catch((error) => {
         error = error as Error;
-        if (showLayer) gsap.to(showLayer, {
+        gsap.to(showLayer as HTMLDivElement, {
           x: 0,
           opacity: 1,
           duration: 0.3,
@@ -76,7 +86,7 @@ export default function SwapRow(props: { id: string, name: string, time: string 
   });
 
   return (
-    <div class="theme-container relative w-full h-11 overflow-hidden">
+    <div ref={container} class="theme-container relative w-full h-11 mb-3 overflow-hidden">
       <div ref={showLayer} class={`theme-show ${decideSwapRowColor(props.id)} absolute inset-0 z-5`}>
         <Row {...props} />
       </div>

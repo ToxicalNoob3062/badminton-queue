@@ -17,7 +17,7 @@ export default function Table() {
           <span class='th flex-1/12 py-2 inline-block'></span>
         </p>
       </div>
-      <div id="table-body" class="text-gray-700 flex flex-col gap-3">
+      <div id="table-body" class="text-gray-700 flex flex-col mb-3">
         <ErrorBoundary fallback={(err, reset) => {
           createEffect(() => players.state === "ready" && reset());
           return <p class="text-red-500 text-lg p-10 text-center">{err.message}</p>
