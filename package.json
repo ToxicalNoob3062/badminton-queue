@@ -8,7 +8,11 @@
     "dev": "turbo run dev"
   },
   "trustedDependencies": [
-    "@tailwindcss/oxide"
+    "@prisma/client",
+    "@prisma/engines",
+    "@tailwindcss/oxide",
+    "esbuild",
+    "prisma"
   ],
   "workspaces": [
     "apps/*"

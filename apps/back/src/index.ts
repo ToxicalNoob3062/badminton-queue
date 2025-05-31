@@ -1,11 +1,9 @@
 import { Elysia } from "elysia";
-import {swagger} from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
 import {staticPlugin} from "@elysiajs/static";
 import { api } from "./api";
 
 const app = new Elysia()
-.use(swagger())
 .use(cors({
   origin: [
     'http://localhost:3000',
@@ -16,10 +14,10 @@ const app = new Elysia()
 .use(api)
 .use(staticPlugin({
   prefix: '',
-  assets: "../front/dist"
+  assets: "./front",
 }))
 .listen({
-  port: 3000,
+  port:  process.env.PORT || 3000,
   hostname: '0.0.0.0'
 })
 
