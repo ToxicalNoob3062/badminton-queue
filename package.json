@@ -4,8 +4,8 @@
   "packageManager": "bun@1.2.11",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
+    "build": "bunx turbo run build",
+    "dev": "bunx turbo run dev"
   },
   "trustedDependencies": [
     "@prisma/client",
