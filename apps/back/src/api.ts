@@ -27,7 +27,7 @@ export const api = new Elysia({
 .get("/health",async () => {
   return {status: "ok"};
 })
-.get("/complaints",async ({db,status}) => {
+.get("/complaints",async ({db}) => {
   return db.getAllComplaints();
 })
 .derive(async ()=>{
