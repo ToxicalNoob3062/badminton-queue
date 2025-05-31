@@ -30,7 +30,7 @@ class DocumentDB {
         const appState = await db.prisma.appState.findFirst();
         if (appState) db.appState = appState;
         else {
-            const {id,...remain} = db.appState;
+            const { id, ...remain } = db.appState;
             db.appState = await db.prisma.appState.create({
                 data: remain
             });
@@ -53,12 +53,16 @@ class DocumentDB {
         this.appState.complaints.push(complaint);
         await this.prisma?.appState.update({
             where: { id: this.appState.id },
-            data: { complaints: {
-                push: complaint
-            }}
+            data: {
+                complaints: {
+                    push: complaint
+                }
+            }
         });
     }
-    async addPlayer(name: string, secret: string, stamp: string): Promise<void> {
+    async addPlayer(name: string, secret: string, stamp: string): Promise<{
+        id: string; name: string; stamp: string
+    }> {
         const player = {
             id: (this.appState.players.length + 1).toString(),
             name,
@@ -68,10 +72,14 @@ class DocumentDB {
         this.appState.players.push(player);
         await this.prisma?.appState.update({
             where: { id: this.appState.id },
-            data: { players: {
-                push: player
-            }}
+            data: {
+                players: {
+                    push: player
+                }
+            }
         });
+        const { secret: _, ...playerWithoutSecret } = player; // Exclude secret from the response
+        return playerWithoutSecret;
     }
     async clearComplaints(): Promise<void> {
         this.appState.complaints = [];
@@ -80,7 +88,7 @@ class DocumentDB {
             data: { complaints: this.appState.complaints }
         });
     }
-    async resetQueue(past:string[]): Promise<void> {
+    async resetQueue(past: string[]): Promise<void> {
         this.appState.past = past;
         this.appState.players = [];
         await this.prisma?.appState.update({
@@ -88,10 +96,10 @@ class DocumentDB {
             data: { past: this.appState.past, players: this.appState.players }
         });
     }
-    async removePlayer(id:string): Promise<void> {
+    async removePlayer(id: string): Promise<void> {
         this.appState.players = this.appState.players
-        .filter(player => player.id !== id)
-        .map((player, idx) => ({ ...player, id: (idx + 1).toString() }));
+            .filter(player => player.id !== id)
+            .map((player, idx) => ({ ...player, id: (idx + 1).toString() }));
         await this.prisma?.appState.update({
             where: { id: this.appState.id },
             data: { players: this.appState.players }

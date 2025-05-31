@@ -7,11 +7,11 @@ import { api } from "./api";
 const app = new Elysia()
 .use(swagger())
 .use(cors({
-  // origin: [
-  //   'http://localhost:3000',
-  //   'http://localhost:5173',
-  //   "192.168.86.102:5173",
-  // ]
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    "192.168.86.102:5173",
+  ]
 }))
 .use(api)
 .use(staticPlugin({

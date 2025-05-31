@@ -6,13 +6,6 @@ import db from "./db";
 
 const logger = createPinoLogger();
 
-type Player = {
-  id: string;
-  name: string;
-  stamp: string;
-  secret: string;
-};
-
 const secretSchema = t.String({
   minLength: 8,
   maxLength: 15,
@@ -26,8 +19,9 @@ export const api = new Elysia({
   prefix: "/api",
 })
 .onError(({error})=>{
-  logger.error(error)
-  throw error;
+  error = error as Error;
+  logger.error(error.message)
+  return new Response(error.message);
 })
 .decorate('db', db)
 .get("/health",async () => {
