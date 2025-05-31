@@ -30,8 +30,9 @@ class DocumentDB {
         const appState = await db.prisma.appState.findFirst();
         if (appState) db.appState = appState;
         else {
+            const {id,...remain} = db.appState;
             db.appState = await db.prisma.appState.create({
-                data: db.appState
+                data: remain
             });
         }
         return db;

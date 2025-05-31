@@ -78,8 +78,7 @@ export const api = new Elysia({
   if (db.appState.players.find(p => p.name === name)) {
     return status(409,{message: "Player name already exists!"});
   }
-  await db.addPlayer(name, secret, stamp);
-  return status(201,{message: "Player added successfully!"});
+  return status(201,await db.addPlayer(name, secret, stamp));
 },{
   body:'joinPayload',
 })
