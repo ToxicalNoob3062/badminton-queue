@@ -6,7 +6,7 @@ type ErrorResponse = {
     message: string;
 }
 
-const server = treaty<App>('http://192.168.86.102:3000')
+const server = treaty<App>(import.meta.env.VITE_API_URL)
 
 
 async function sleep(ms: number) {

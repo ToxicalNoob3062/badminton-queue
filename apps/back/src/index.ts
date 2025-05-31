@@ -8,7 +8,7 @@ const app = new Elysia()
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
-    "192.168.86.102:5173",
+     process.env.APP_DOMAIN || "https://queue.code-with-rahat.com"
   ]
 }))
 .use(api)
