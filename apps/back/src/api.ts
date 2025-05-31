@@ -1,8 +1,10 @@
 import { Elysia , t} from "elysia";
 import { DateTime } from "luxon";
-import { logger } from '@bogeychan/elysia-logger';
+import { createPinoLogger } from '@bogeychan/elysia-logger';
 import { compareTimes } from "./timing";
 import db from "./db";
+
+const logger = createPinoLogger();
 
 type Player = {
   id: string;
@@ -23,7 +25,10 @@ export const api = new Elysia({
   name: "Badminton Queue API",
   prefix: "/api",
 })
-.use(logger({ autoLogging: true }))
+.onError(({error})=>{
+  logger.error(error)
+  throw error;
+})
 .decorate('db', db)
 .get("/health",async () => {
   return {status: "ok"};
