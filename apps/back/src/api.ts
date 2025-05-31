@@ -1,6 +1,8 @@
 import { Elysia , t} from "elysia";
 import { DateTime } from "luxon";
-import TimingService from "./timing";
+import { logger } from '@bogeychan/elysia-logger';
+import { compareTimes } from "./timing";
+import db from "./db";
 
 type Player = {
   id: string;
@@ -21,49 +23,37 @@ export const api = new Elysia({
   name: "Badminton Queue API",
   prefix: "/api",
 })
-.decorate('timingService', TimingService)
-.state("db",{
-  past: [] as string[],
-  players: [] as Player[],
-  complaints: [] as string[],
-  startTime: "10:00 AM"
-})
+.use(logger({ autoLogging: true }))
+.decorate('db', db)
 .get("/health",async () => {
   return {status: "ok"};
 })
-.get("/complaints",async ({store:{db}}) => {
-  return db.complaints;
+.get("/complaints",async ({db,status}) => {
+  return db.getAllComplaints();
 })
 .derive(async ()=>{
   return {
     stamp: DateTime.now().setZone('America/Toronto').toFormat('h:mm a')
   }
 })
-.onBeforeHandle(async ({store:{db},stamp,timingService,status})=>{
+.onBeforeHandle(async ({db,stamp,status})=>{
   const [day,month] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM').split(' ');
-  const [pDay, pMonth] = db.past;
+  const [pDay, pMonth] = db.appState.past;
   if (month!==pMonth){
-    db.complaints = [];
+    await db.clearComplaints();
   }
   if (day !== pDay){
-    db.past = [day,month];
-    db.players = [];
+    await db.resetQueue([day,month]);
   }
-  if (timingService.compareTimes(db.startTime,stamp)>=0){
-    return status(403,{message: `Participation starts at ${db.startTime}!`});
+  if (compareTimes(db.appState.startTime,stamp)>=0){
+    return status(403,{message: `Participation starts at ${db.appState.startTime}!`});
   }
 })
-.get("/players",async ({store:{db}}) => {
-  const players = db.players.map(player => ({
-    id: player.id,
-    name: player.name,
-    stamp: player.stamp,
-  }));
-  players.sort((a,b)=>a.id.localeCompare(b.id));
-  return players;
+.get("/players",async ({db}) => {
+  return await db.getAllPlayers();
 })
-.post("/complain", async ({body:{complaint},store:{db},status})=>{
-  db.complaints.push(complaint);
+.post("/complain", async ({body:{complaint},db,status})=>{
+  await db.addComplaint(complaint);
   return status(201,{message: "Complaint submitted successfully!"});
 },{
   body:t.Object({
@@ -79,28 +69,21 @@ export const api = new Elysia({
     secret: secretSchema
   })
 })
-.post("/join", async ({body:{name,secret},store:{db},status,stamp})=>{
-  const player = {
-    id: (db.players.length+1).toString(),
-    name,
-    stamp,
-  } as Player;
-  if (db.players.find(p => p.name === player.name)) {
+.post("/join", async ({body:{name,secret},db,status,stamp})=>{
+  if (db.appState.players.find(p => p.name === name)) {
     return status(409,{message: "Player name already exists!"});
   }
-  db.players.push({...player, secret});
-  return status(201,player);
+  await db.addPlayer(name, secret, stamp);
+  return status(201,{message: "Player added successfully!"});
 },{
   body:'joinPayload',
 })
-.delete("/leave/:id",async ({params:{id},store:{db},body:{secret},status})=>{
-  const index = db.players.findIndex(player => player.id === id);
+.delete("/leave/:id",async ({params:{id},db,body:{secret},status})=>{
+  const index = db.appState.players.findIndex(player => player.id === id);
   if(index === -1) return status(404,{message: "Player not found!"});
-  if (db.players[index].secret !== secret)
+  if (db.appState.players[index].secret !== secret)
     return status(403,{message: "Invalid secret!"});
-  db.players = db.players
-    .filter(player => player.id !== id)
-    .map((player, idx) => ({ ...player, id: (idx + 1).toString() }));
+  await db.removePlayer(id);
   return status(200,{message: "Player erased successfully!"});
 },{
   params:t.Object({

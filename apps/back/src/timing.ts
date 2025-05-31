@@ -7,7 +7,7 @@ function parseTime(timeStr: string): number {
   return hours * 60 + minutes;
 }
 
-function compareTimes(timeA: string, timeB: string): number {
+export function compareTimes(timeA: string, timeB: string): number {
   const a = parseTime(timeA);
   const b = parseTime(timeB);
   if (a > b) return 1;
@@ -15,6 +15,3 @@ function compareTimes(timeA: string, timeB: string): number {
   return 0;
 }
 
-export default {
-  compareTimes
-};
