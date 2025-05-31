@@ -6,7 +6,7 @@ type ErrorResponse = {
     message: string;
 }
 
-const server = treaty<App>(import.meta.env.VITE_API_URL)
+const server = treaty<App>(import.meta.env.VITE_API_URL || "https://queue.code-with-rahat.com")
 
 
 async function sleep(ms: number) {

@@ -1,5 +1,5 @@
 import { Elysia , t} from "elysia";
-import { DateTime } from "luxon";
+import { formatInTimeZone } from "date-fns-tz"; 
 import { createPinoLogger } from '@bogeychan/elysia-logger';
 import { compareTimes } from "./timing";
 import db from "./db";
@@ -32,11 +32,11 @@ export const api = new Elysia({
 })
 .derive(async ()=>{
   return {
-    stamp: DateTime.now().setZone('America/Toronto').toFormat('h:mm a')
+    stamp: formatInTimeZone(new Date(), "America/Toronto", "h:mm a")
   }
 })
 .onBeforeHandle(async ({db,stamp,status})=>{
-  const [day,month] = DateTime.now().setZone('America/Toronto').toFormat('dd MMM').split(' ');
+  const [day,month] = formatInTimeZone(new Date(), "America/Toronto", "dd MMM").split(" ");
   const [pDay, pMonth] = db.appState.past;
   if (month!==pMonth){
     await db.clearComplaints();
