@@ -19,9 +19,6 @@ export default function RuleBook() {
           <span class="text-red-600 font-semibold">Red</span> players cannot play until they move up to <span class="text-yellow-600 font-semibold">Yellow</span>. Once in <span class="text-yellow-600 font-semibold">Yellow</span>, those rules apply.
         </li>
         <li>
-          Registration opens daily at <b>3pm</b> to give everyone a fair chance to join.
-        </li>
-        <li>
           Please arrive on time and be ready to play within 5 minutes. If someone reserves a spot and doesn’t show up, present players can report it anonymously.
         </li>
         <li>
