@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "bunx turbo run build",
-    "dev": "bunx turbo run dev"
+    "dev": "bunx turbo run dev",
+    "compile": "docker builder prune --all && docker build -t rahat3062/queue:latest . && docker push rahat3062/queue:latest"
   },
   "trustedDependencies": [
     "@prisma/client",
