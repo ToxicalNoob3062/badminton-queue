@@ -8,13 +8,7 @@ type ErrorResponse = {
 
 const server = treaty<App>(import.meta.env.VITE_API_URL || "https://queue.code-with-rahat.com")
 
-
-async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 export async function getPlayers() {
-    await sleep(100)
     const resp = await server.api.players.get()
     if (resp.error) {
         const error = resp.error.value as ErrorResponse;
@@ -24,7 +18,6 @@ export async function getPlayers() {
 }
 
 export async function getComplaints() {
-    await sleep(100)
     const resp = await server.api.complaints.get()
     if (resp.error) {
         const error = resp.error.value as ErrorResponse;
