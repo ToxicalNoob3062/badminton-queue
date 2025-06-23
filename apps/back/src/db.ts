@@ -21,7 +21,7 @@ class DocumentDB {
         id: '1',
         past: [],
         complaints: [],
-        startTime: '3:00 PM',
+        startTime: '12:00 AM',
         players: []
     }
     static async create(prisma: PrismaClient): Promise<DocumentDB> {
@@ -41,7 +41,7 @@ class DocumentDB {
         return this.appState.complaints;
     }
     async getAllPlayers(): Promise<{ id: string; name: string; stamp: string }[]> {
-        this.appState.players.sort((a, b) => a.id.localeCompare(b.id));
+        this.appState.players.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));;
         const players = this.appState.players.map(player => ({
             id: player.id,
             name: player.name,
